@@ -1,1 +1,1 @@
-This is a tokio multithreading test which downloads a specified amount of fox images from https://randomfox.ca
+This is a tokio multithreading test which downloads a specified amount of fox images (constant DOWNLOAD_AMOUNT in main.rs) from https://randomfox.ca
