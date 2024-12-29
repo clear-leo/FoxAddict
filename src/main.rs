@@ -12,9 +12,11 @@ const DOWNLOAD_AMOUNT: i32 = 10;
 async fn main() -> Result<(), Box<dyn Error>> {
     let client = Arc::from(Client::new());
     let mut handles: Vec<task::JoinHandle<()>> = vec![];
+    
     for index in 1..=DOWNLOAD_AMOUNT {
         handles.push(task::spawn(get_fox_image(client.clone(), index)));
     }
+    
     for handle in handles {
         match handle.await {
             Ok(_) => {},
@@ -33,8 +35,10 @@ async fn get_fox_image(client: Arc<Client>, num: i32) {
     sleep(Duration::from_secs_f32(sleep_time)).await;
 
     let body: Value = client.get(URL).send().await.unwrap().json().await.unwrap();
+    
     let image_link = body.get(LINK_INDEX).unwrap_or(&empty).as_str().unwrap();
     let image_data = client.get(image_link).send().await.unwrap().bytes().await.unwrap();
+    
     let mut image_file = match File::create(format!("data/{num}.png")).await {
         Ok(file) => file,
         Err(_) => {
