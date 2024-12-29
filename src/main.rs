@@ -1,7 +1,7 @@
-use std::{error::Error, fs::File, io::Write, sync::Arc};
+use std::{error::Error, sync::Arc};
 use reqwest::Client;
 use serde_json::Value;
-use tokio::{fs::create_dir, task, time::{sleep, Duration}};
+use tokio::{fs::{create_dir, File}, io::AsyncWriteExt, task, time::{sleep, Duration}};
 use rand::random;
 
 const URL: &str = "https://randomfox.ca/floof/";
@@ -35,12 +35,12 @@ async fn get_fox_image(client: Arc<Client>, num: i32) {
     let body: Value = client.get(URL).send().await.unwrap().json().await.unwrap();
     let image_link = body.get(LINK_INDEX).unwrap_or(&empty).as_str().unwrap();
     let image_data = client.get(image_link).send().await.unwrap().bytes().await.unwrap();
-    let mut image_file = match File::create(format!("data/{num}.png")) {
+    let mut image_file = match File::create(format!("data/{num}.png")).await {
         Ok(file) => file,
         Err(_) => {
             create_dir("data").await.unwrap();
             return;
         },
     };
-    image_file.write(&image_data.to_vec()).unwrap();
+    image_file.write(&image_data.to_vec()).await.unwrap();
 }
